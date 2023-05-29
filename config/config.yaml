@@ -1,0 +1,17 @@
+project-id: aula-gcp-alves 
+project-name: aula-gcp-py
+cloud: gcp
+connector-oltp:
+  db_name: postgres
+  lib: psycopg2
+  db_user: etl
+  db_password: etl 
+  db_host: 35.199.105.79
+  db_iduser: 16478
+credentials_path: C:\Users\leand\Desktop\py-gcp\config\aula-gcp-alves-0d13764524e5.json
+bucket-rawdata: aula-py-gcp-alves-raw
+bucket-negocio: aula-py-gcp-alves-dw
+bucket-processado: aula-py-gcp-alves-processado
+
+
+
