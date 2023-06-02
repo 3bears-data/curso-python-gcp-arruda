@@ -3,6 +3,7 @@ from dw import dict_modelo
 import gcsfs
 from google.cloud import bigquery
 from google.cloud import storage
+from datetime import timedelta
 import pandas as pd
 import io
 import dask.dataframe as dd 
@@ -29,6 +30,7 @@ def rodar():
     try:
         df_arquivos_legado = dd.read_csv(f'gs://{bucket_processed}/from-silver-to-gold/*', encoding='iso-8859-1', sep=";")
         df_arquivos_legado = df_arquivos_legado.compute() # Converte o DataFrame do dask para pandas
+        df_arquivos_legado.rename(columns={df_arquivos_legado.columns[0]: 'arquivo'}, inplace=True)
 
     except:
         df_arquivos_legado = pd.DataFrame({'arquivo': None}, index=[0])
@@ -64,7 +66,11 @@ def rodar():
 
         #inicia validacao se deve ou nao rodar em todos os arquivos do loop
         for blob in blob_list:
-            id_file = f"{blob.name}_{blob.updated.strftime('%Y%m%d%H%M%S')}"
+            updated_time = blob.updated
+            updated_time -= timedelta(hours=3)
+            formatted_time = updated_time.strftime('%Y%m%d%H%M%S')
+
+            id_file = f"{blob.name}_{formatted_time}"            
 
             if not id_file in lst_legado: #verificacao se deve ou nao rodar
                 print(f"\nArquivo {blob.name} será processado para gold pois é novo.")
@@ -167,7 +173,7 @@ def rodar():
                     for i in fields_for_updates:
                         atualizaveis = atualizaveis + "data." + str(i) + " = staging." + str(i) + ","
                         verificaveis = verificaveis + "data." + str(i) + " <> staging." + str(i) + " or "
-
+                    
                     atualizaveis = atualizaveis[:-1]
                     verificaveis = verificaveis[:-3]
 
